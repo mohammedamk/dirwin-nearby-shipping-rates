@@ -6,7 +6,7 @@ import {
   shopifyApp,
 } from "@shopify/shopify-app-remix/server";
 import "./db.server";
-import { MongoDBSessionStorage } from '@shopify/shopify-app-session-storage-mongodb';
+import { MongoDBSessionStorage } from "@shopify/shopify-app-session-storage-mongodb";
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
@@ -14,7 +14,10 @@ const shopify = shopifyApp({
   scopes: process.env.SCOPES?.split(","),
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
-  sessionStorage: new MongoDBSessionStorage(process.env.MONGODB_URI, "nearbyStores"),
+  sessionStorage:
+    process.env.NODE_ENV === "development"
+      ? new MongoDBSessionStorage(process.env.MONGODB_URI, "nearbyStores")
+      : new MongoDBSessionStorage(process.env.MONGODB_URI),
   distribution: AppDistribution.AppStore,
   hooks: {
     afterAuth: async ({ session }) => {
@@ -26,14 +29,14 @@ const shopify = shopifyApp({
       deliveryMethod: DeliveryMethod.Http,
       callbackUrl: "/webhooks/checkouts/update",
     },
-    APP_SCOPES_UPDATE:{
+    APP_SCOPES_UPDATE: {
       deliveryMethod: DeliveryMethod.Http,
       callbackUrl: "/webhooks/app/scopes_update",
     },
-    APP_UNINSTALLED:{
+    APP_UNINSTALLED: {
       deliveryMethod: DeliveryMethod.Http,
       callbackUrl: "/webhooks/app/uninstalled",
-    }
+    },
   },
   future: {
     unstable_newEmbeddedAuthStrategy: true,

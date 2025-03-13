@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "ec9deb9e51ad8be4d227ccdef01b192c"
+name = "nearby-shipping-rates"
+handle = "nearby-shipping-rates-1"
+application_url = "https://columns-taiwan-guides-tutorials.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "dirwin-assembly-app-store.myshopify.com"
+include_config_on_deploy = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_checkouts,read_orders,write_products,write_shipping"
+
+[auth]
+redirect_urls = [
+  "https://columns-taiwan-guides-tutorials.trycloudflare.com/auth/callback",
+  "https://columns-taiwan-guides-tutorials.trycloudflare.com/auth/shopify/callback",
+  "https://columns-taiwan-guides-tutorials.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2025-01"
+
+[pos]
+embedded = false

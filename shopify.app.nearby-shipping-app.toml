@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "2b1773151f795ae764a74b5d8e37ef3a"
+name = "nearby-shipping-app"
+handle = "nearby-shipping-app-2"
+application_url = "https://beer-project-mit-usd.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "test-payment-store-for-testing.myshopify.com"
+include_config_on_deploy = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_checkouts,read_orders,write_products,write_shipping"
+
+[auth]
+redirect_urls = [
+  "https://beer-project-mit-usd.trycloudflare.com/auth/callback",
+  "https://beer-project-mit-usd.trycloudflare.com/auth/shopify/callback",
+  "https://beer-project-mit-usd.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2025-01"
+
+[pos]
+embedded = false

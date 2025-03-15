@@ -25,7 +25,7 @@ export async function handleFetchCarrierServiceApi({ admin }) {
           );
           
           const data = await response.json();
-          console.log('data: ', data.data.carrierServices);
+        //   console.log('data: ', data.data.carrierServices);
 
         if (data?.data?.carrierServices) {
             carrierServices = data.data.carrierServices.edges || [];

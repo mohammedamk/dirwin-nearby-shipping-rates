@@ -24,12 +24,30 @@ async function handleGetUserLocation({ pincode }) {
   }
 }
 
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const toRad = (angle) => (angle * Math.PI) / 180;
+  const R = 6371; // Earth's radius in km
+
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; 
+}
+
 async function handleGetNearbyAddress(lat, long) {
   let totalNoOfAddresses, range, addressList;
   let rates = [],
     type;
   try {
     const googleSettings = await GoogleSettings.findOne({});
+    // Shipped to NYC Bicycle Shop for professional assembly at: 1178 Bay St, Staten Island, NY 10305, USA. 
+    // Earliest pickup date: 2-3 days after bicycle(s) arrival. 
+    // Pickup distance: approx. 11.9 mi away.
     console.log("⚙︎ googleSettings: ", googleSettings);
     if (googleSettings) {
       totalNoOfAddresses = googleSettings.noOfAddresses;
@@ -39,7 +57,8 @@ async function handleGetNearbyAddress(lat, long) {
         `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${long}&radius=${(range || 15) * 1000}&type=${type === "" || type === null ? "bicycle_store" : type}&key=${GOOGLE_API_KEY}`,
       );
       const placesData = await placesResponse.json();
-      console.log("near by addresses: ", placesData.results.length);
+      
+      console.log("near by addresses: ", placesData.results);
       if (placesData.status === "OK") {
         if (placesData.results.length >= totalNoOfAddresses) {
           addressList = placesData.results.slice(0, totalNoOfAddresses);
@@ -47,16 +66,21 @@ async function handleGetNearbyAddress(lat, long) {
           addressList = placesData.results || [];
         }
         if (addressList.length > 0) {
-          rates = addressList.map((item) => ({
-            name: item.name,
-            address: item.vicinity,
-            rating: item.rating || "No rating",
-            place_id: item.place_id,
-            location: {
-              lat: item.geometry.location.lat,
-              lng: item.geometry.location.lng,
-            },
-          }));
+          rates = addressList.map((item) => {
+            const storeLat = item.geometry.location.lat;
+            const storeLon = item.geometry.location.lng;
+            const distanceInKm = haversineDistance(lat, long, storeLat, storeLon);
+            const distanceInMiles = (distanceInKm * 0.621371).toFixed(2); 
+          
+            return {
+              name: item.name,
+              address: item.vicinity,
+              rating: item.rating || "No rating",
+              place_id: item.place_id,
+              location: { lat: storeLat, lng: storeLon },
+              milesAway: `${distanceInMiles} miles away`,
+            };
+          });
         }
         return {
           status: "OK",
@@ -104,8 +128,8 @@ export const action = async ({ request }) => {
   const productIds = body.rate.items.map(
     (item) => `gid://shopify/Product/${item.product_id}`,
   );
-  console.log("productIds: ", productIds);
-  console.log("shipping details: ", body.rate);
+  // console.log("productIds: ", productIds);
+  // console.log("shipping details: ", body.rate);
   try {
     const pincode = body.rate.destination?.postal_code;
     console.log("🅿️  pincode: ", pincode);
@@ -131,7 +155,7 @@ export const action = async ({ request }) => {
                 service_name: item.name,
                 service_code: item.place_id,
                 total_price: "0",
-                description: item.address,
+                description: `Pick Up Assembled at ${item.name}, ${item.address}, ${item.milesAway}`,
                 currency: body.rate.currency,
               }));
               console.log("💲 rates: ", rates);

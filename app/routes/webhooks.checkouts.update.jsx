@@ -4,7 +4,7 @@ import { handleFetchProductTags } from "../components/productTagAPI";
 import CarrierService from "../database/carrier-service"
 import { authenticate } from "../shopify.server";
 const CARRIER_SERVICE_NAME = "Nearby Carrier Service";
-let CALL_BACK_URL ="https://columns-taiwan-guides-tutorials.trycloudflare.com/api/shipping-rates";
+let CALL_BACK_URL ="https://obesity-cricket-promo-idaho.trycloudflare.com/api/shipping-rates";
 
 export const action = async ({ request }) => {
   const { shop, topic, session, admin,payload } = await authenticate.webhook(request);
